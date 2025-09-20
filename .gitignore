@@ -1,0 +1,14 @@
+.vscode
+*.o
+*.ko
+*.obj
+*.elf
+*.exe
+*.out
+*.app
+*.a
+*.lib
+*.so
+*.so.*
+*.dylib
+*.dll
