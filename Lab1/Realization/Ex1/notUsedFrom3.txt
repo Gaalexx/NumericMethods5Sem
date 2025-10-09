@@ -1,0 +1,21 @@
+    #pragma region notUsed
+    /* Matrix<Type> B(n, n, 0), C(n, n, 0), E(n, n, 0);
+
+    for (int i = 0; i < n; i++)
+    {
+        E[i][i] = 1;
+        for (int j = 0; j < n; j++)
+        {
+            if (i > j)
+            {
+                B[i][j] = system[i][j];
+            }
+            else
+            {
+                C[i][j] = system[i][j];
+            }
+        }
+    }
+ */
+
+ #pragma endregion
