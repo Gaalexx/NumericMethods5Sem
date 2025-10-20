@@ -6,7 +6,7 @@ using ScottPlot;
 class Program
 {
     public delegate double FunctionToSolve(double arg);
-    public const int MAX_ITERATIONS = 10000000;
+    public const int MAX_ITERATIONS = 1000000000;
 
     public static double derivative(double arg)
     {
@@ -17,10 +17,9 @@ class Program
     {
         return arg * arg * arg + arg * arg - arg - 0.5;
     }
-
     public static double phi(double arg)
     {
-        return arg * arg * arg + arg * arg - 0.5;
+        return Math.Sqrt((arg + 0.5) / (arg + 1));
     }
 
     public static double xFunc(double arg)

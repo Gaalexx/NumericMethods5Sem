@@ -161,7 +161,7 @@ namespace Program
                 }
                 innitApprxPrev = innitApprx.ToList<double>();
 
-                double detX = b[0][0] * system[1][1] - b[1][0] * system[0][1];
+                double detX = b[0][0] * system[1][1] - b[1][0] * system[0][1]; //с помощью формулы
                 double detY = system[0][0] * b[1][0] - system[1][0] * b[0][0];
                 innitApprx[0] = innitApprx[0] + (detX / det);
                 innitApprx[1] = innitApprx[1] + (detY / det);
