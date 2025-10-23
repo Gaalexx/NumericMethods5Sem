@@ -73,6 +73,26 @@ namespace Program
             return Math.Log10(xi[0] + 1) + 1;
         }
 
+        public static double phi1Derivate(List<double> xi)
+        {
+            return Math.Abs(Math.Sin(xi[1]));
+        }
+
+        public static double phi2Derivate(List<double> xi)
+        {
+            return Math.Abs(1 / (Math.Log(10) * (xi[0] + 1)));
+        }
+
+        public static double phiMaxDerivate(ref List<double> matrix)
+        {
+            double Q = double.MinValue;
+            for (int i = 0; i < matrix.Count; i += 2)
+            {
+                Q = Math.Max(Q, matrix[i]);
+            }
+            return Q;
+        }
+
         public static Plot drawPlot(FunctionType cb1, FunctionType cb2)
         {
             Plot plot = new();
@@ -121,6 +141,37 @@ namespace Program
             return true;
         }
 
+        public static bool lessThanEpsilonQ(
+            ref List<double> iA,
+            ref List<double> iA1,
+            ref List<double> iAp,
+            ref List<FunctionType> ftphi,
+            double eps
+        )
+        {
+            double Q = double.MinValue;
+            List<double> matrix = new double[4].ToList<double>();
+            matrix[0] = ftphi[0](iA);
+            matrix[1] = 0;
+            matrix[2] = ftphi[1](iA);
+            matrix[3] = 0;
+            Q = phiMaxDerivate(ref matrix);
+
+            Console.WriteLine($"Q = {Q}");
+            if (iA.Count != iAp.Count)
+            {
+                throw new Exception("Размер векторов должен быть одинаковым!");
+            }
+            for (int i = 0; i < iA.Count; i++)
+            {
+                if ((Q / (1 - Q)) * Math.Abs(iA[i] - iAp[i]) >= eps)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         public static List<double> newtoneMethod(
             List<FunctionType> listOfFunctions,
             List<FunctionType> listOfDerivatives,
@@ -161,7 +212,7 @@ namespace Program
                 }
                 innitApprxPrev = innitApprx.ToList<double>();
 
-                double detX = b[0][0] * system[1][1] - b[1][0] * system[0][1]; //с помощью формулы
+                double detX = b[0][0] * system[1][1] - b[1][0] * system[0][1]; //с помощью Крамера
                 double detY = system[0][0] * b[1][0] - system[1][0] * b[0][0];
                 innitApprx[0] = innitApprx[0] + (detX / det);
                 innitApprx[1] = innitApprx[1] + (detY / det);
@@ -182,7 +233,9 @@ namespace Program
 
         public static List<double> iterationalMethod(
             List<FunctionType> listOfPhi,
+            List<FunctionType> listOfPhiDer,
             List<double> innitApprx,
+            List<double> innitApprx1,
             double eps
         )
         {
@@ -190,7 +243,13 @@ namespace Program
             innitApprxPrev[0] += 100;
             int iterationsCount = 0;
             while (
-                !lessThanEpsilon(ref innitApprx, ref innitApprxPrev, eps)
+                !lessThanEpsilonQ(
+                    ref innitApprx,
+                    ref innitApprx1,
+                    ref innitApprxPrev,
+                    ref listOfPhiDer,
+                    eps
+                )
                 && iterationsCount++ < MAX_ITERATIONS
             )
             {
@@ -224,9 +283,10 @@ namespace Program
 
             String? input = null;
 
-            Console.WriteLine("Введите начальное приближение x и y...");
+            Console.WriteLine("Введите начальное приближение x1 и y1...");
             input = Console.ReadLine();
             List<double> approx = new double[2].ToList<double>();
+            List<double> approx1 = new double[2].ToList<double>();
             if (input == null)
             {
                 Console.WriteLine("Начальное приближение не дано.");
@@ -242,10 +302,34 @@ namespace Program
                 }
                 else
                 {
-                    approx[0] = double.Parse(parts[0]); //тут почему-то outOfrange exception92
+                    approx[0] = double.Parse(parts[0]);
                     approx[1] = double.Parse(parts[1]);
                 }
             }
+
+            Console.WriteLine("Введите начальное приближение x2 и y2...");
+            input = Console.ReadLine();
+
+            if (input == null)
+            {
+                Console.WriteLine("Начальное приближение не дано.");
+                return;
+            }
+            else
+            {
+                string[] parts = input.Split(' ');
+                if (parts.Length < 2)
+                {
+                    Console.WriteLine("Начальное приближение не дано.");
+                    return;
+                }
+                else
+                {
+                    approx1[0] = double.Parse(parts[0]);
+                    approx1[1] = double.Parse(parts[1]);
+                }
+            }
+
             Console.WriteLine("Введите эпсилон...");
             input = Console.ReadLine();
             double eps;
@@ -268,7 +352,13 @@ namespace Program
             }
 
             Console.WriteLine("Метод итераций:");
-            res = iterationalMethod(new List<FunctionType> { phi1, phi2 }, approx, eps);
+            res = iterationalMethod(
+                new List<FunctionType> { phi1, phi2 },
+                new List<FunctionType> { phi2Derivate, phi1Derivate },
+                approx,
+                approx1,
+                eps
+            );
             for (int i = 0; i < res.Count; i++)
             {
                 Console.WriteLine($"x{i + 1} = {res[i]}");

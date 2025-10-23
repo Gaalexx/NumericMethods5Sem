@@ -13,13 +13,28 @@ class Program
         return 3 * arg * arg + 2 * arg - 1;
     }
 
+    public static double derivative2(double arg)
+    {
+        return 6 * arg + 2;
+    }
+
     public static double function(double arg)
     {
         return arg * arg * arg + arg * arg - arg - 0.5;
     }
+
     public static double phi(double arg)
     {
         return Math.Sqrt((arg + 0.5) / (arg + 1));
+    }
+
+    
+
+    public static double phiDerivate(double arg)
+    {
+        return Math.Abs(
+            Math.Sqrt(2 * arg + 2) / (Math.Sqrt(2 * arg + 1) * (2 * arg + 2) * (2 * arg + 2))
+        );
     }
 
     public static double xFunc(double arg)
@@ -27,17 +42,21 @@ class Program
         return arg;
     }
 
-    public static double iterationalMethod(double startEq, double epsilon)
+    public static double iterationalMethod(double startEq, double startEq1, double epsilon)
     {
         int iterationsCount = 0;
         double oldRes = startEq;
         double curRes = 0;
-
+        double Q = Math.Max(phiDerivate(startEq), phiDerivate(startEq1));
+        Console.WriteLine($"Q = {Q}");
         while (iterationsCount++ < MAX_ITERATIONS)
         {
             curRes = phi(oldRes);
 
-            if (Math.Abs(curRes - oldRes) < epsilon && Math.Abs(function(curRes)) < epsilon)
+            if (
+                (Q / (1 - Q)) * Math.Abs(curRes - oldRes) < epsilon
+                && Math.Abs(function(curRes)) < epsilon
+            )
             {
                 Console.WriteLine($"Метод сошелся за {iterationsCount} итераций");
                 return curRes;
@@ -54,7 +73,7 @@ class Program
         int iterationsCount = 0;
         double oldRes = startEq,
             curRes = 0;
-        while (iterationsCount++ < MAX_ITERATIONS)
+        /* while (iterationsCount++ < MAX_ITERATIONS)
         {
             curRes = oldRes - function(oldRes) / derivative(oldRes);
 
@@ -63,6 +82,28 @@ class Program
                 Console.WriteLine($"Метод сошелся за {iterationsCount} итераций");
                 return curRes;
             }
+        }
+        throw new InvalidOperationException($"Метод не сошелся за {MAX_ITERATIONS} итераций"); */
+        while (iterationsCount++ < MAX_ITERATIONS)
+        {
+            double deriv = derivative(oldRes);
+
+            if (Math.Abs(deriv) < 1e-15)
+            {
+                throw new InvalidOperationException(
+                    "Производная близка к нулю, метод не может продолжиться"
+                );
+            }
+
+            curRes = oldRes - function(oldRes) / deriv;
+
+            if (Math.Abs(curRes - oldRes) < epsilon)
+            {
+                Console.WriteLine($"Метод сошелся за {iterationsCount} итераций");
+                return curRes;
+            }
+
+            oldRes = curRes;
         }
         throw new InvalidOperationException($"Метод не сошелся за {MAX_ITERATIONS} итераций");
     }
@@ -95,7 +136,7 @@ class Program
                 y[j] = ftS[i](x[j]);
             }
 
-            plt.Add.Scatter(x, y);
+            plt.Add.ScatterLine(x, y);
         }
 
         return plt;
@@ -122,20 +163,48 @@ class Program
         Process.Start("xdg-open", deriFuncImage);
 
         Console.WriteLine("Введите начальное приближение...");
+        Console.WriteLine("Введите левую границу...");
         var input = Console.ReadLine();
         double beginEq = Convert.ToDouble(input);
+
+        Console.WriteLine("Введите правую границу...");
+        input = Console.ReadLine();
+        double beginEq1 = Convert.ToDouble(input);
 
         Console.WriteLine("Введите точность вычислений...");
         input = Console.ReadLine();
         double epsilon = Convert.ToDouble(input);
 
-        var res = iterationalMethod(beginEq, epsilon);
+        var res = iterationalMethod(beginEq, beginEq1, epsilon);
         Console.WriteLine($"Итерационным алгоритмом: {res}");
         Console.WriteLine($"Equation({res}) = {function(res)}");
 
-        res = iterationalMethod(beginEq, epsilon);
-        Console.WriteLine($"Методом Ньютона: {res}");
-        Console.WriteLine($"Equation({res}) = {function(res)}");
+        Console.WriteLine(
+            $"Проверка для метода Ньютона f(x) * f''(x) = {function(beginEq) * derivative2(beginEq)}"
+        );
+
+        Console.WriteLine(
+            $"Проверка для метода Ньютона f(x) * f''(x) = {function(beginEq1) * derivative2(beginEq1)}"
+        );
+        if (function(beginEq) * derivative2(beginEq) > 0)
+        {
+            res = newtoneMethod(beginEq, epsilon);
+            Console.WriteLine($"Методом Ньютона: {res}");
+            Console.WriteLine($"Equation({res}) = {function(res)}");
+        }
+        else if (function(beginEq1) * derivative2(beginEq1) > 0)
+        {
+            res = newtoneMethod(beginEq1, epsilon);
+            Console.WriteLine($"Методом Ньютона: {res}");
+            Console.WriteLine($"Equation({res}) = {function(res)}");
+        }
+        else
+        {
+            Console.WriteLine(
+                "Невозможно посчитать корень методом Ньютона с таким начальным приближением."
+            );
+        }
+
         return;
     }
 }
