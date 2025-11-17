@@ -69,9 +69,7 @@ namespace Program
                 $"First derivate {firstDerivate}\nSecond derivate {secondDerivate}"
             );
 
-            /* var graph = drawGraphic(in results, [new Color(200, 15, 150), new Color(15, 250, 100)]);
-            graph.SavePng("plot.png", 800, 600);
-            Process.Start("xdg-open", "plot.png"); */
+
         }
     }
 }

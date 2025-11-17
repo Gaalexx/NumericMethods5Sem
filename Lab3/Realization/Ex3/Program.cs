@@ -54,7 +54,7 @@ namespace Program
 
         public static void Main(String[] args)
         {
-            List<Tuple<double, double>> testLab3 = new List<Tuple<double, double>>()
+            /* List<Tuple<double, double>> testLab3 = new List<Tuple<double, double>>()
             {
                 new Tuple<double, double>(0, 0),
                 new Tuple<double, double>(1.7, 1.3038),
@@ -92,7 +92,33 @@ namespace Program
 
 
             Console.WriteLine(ThirdLab.sumOfSquareErrors(in testLab3, in res1));
-            Console.WriteLine(ThirdLab.sumOfSquareErrors(in testLab3, in res2));
+            Console.WriteLine(ThirdLab.sumOfSquareErrors(in testLab3, in res2)); */
+
+            List<Tuple<double, double>> lab = new List<Tuple<double, double>>()
+            {
+                new Tuple<double, double>(1.0, 2.4142),
+                new Tuple<double, double>(1.9, 1.0818),
+                new Tuple<double, double>(2.8, 0.50953),
+                new Tuple<double, double>(3.7, 0.11836),
+                new Tuple<double, double>(4.6, -0.24008),
+                new Tuple<double, double>(5.5, -0.66818),
+            };
+
+            var plot = drawGraphic(
+                [ThirdLab.MinimalSqaresMethod(1, in lab), ThirdLab.MinimalSqaresMethod(2, in lab)],
+                [new Color(200, 15, 150), new Color(15, 200, 150)],
+                "Лабораторная работа №4"
+            );
+
+            plot.SavePng("plot.png", 800, 600);
+            Process.Start("xdg-open", "plot.png");
+
+            Console.WriteLine(
+                $"Для первой степени: {ThirdLab.sumOfSquareErrors(in lab, ThirdLab.MinimalSqaresMethod(1, in lab))}"
+            );
+            Console.WriteLine(
+                $"Для второй степени: {ThirdLab.sumOfSquareErrors(in lab, ThirdLab.MinimalSqaresMethod(2, in lab))}"
+            );
         }
     }
 }

@@ -52,9 +52,16 @@ namespace Program
             return plt;
         }
 
+        public static double cot(double x)
+        {
+            return 1 / Math.Tan(x);
+        }
+
         public static void Main(String[] args)
         {
-            /* List<Tuple<double, double>> functionResults = new List<Tuple<double, double>>()
+            double x = Math.PI / 3;
+
+            List<Tuple<double, double>> a = new List<Tuple<double, double>>()
             {
                 new Tuple<double, double>(
                     Math.PI / 8,
@@ -72,12 +79,9 @@ namespace Program
                     Math.PI / 2,
                     Math.Cos(Math.PI / 2) / Math.Sin(Math.PI / 2)
                 ),
-            }; */
+            };
 
-            //Console.WriteLine(LagranzhInterpolationPolynomial(Math.PI / 3, in functionResults));
-            //Console.WriteLine(NewtonInterpolationPolynomial(Math.PI / 3, in functionResults));
-
-            /* List<Tuple<double, double>> functionResults2 = new List<Tuple<double, double>>()
+            List<Tuple<double, double>> b = new List<Tuple<double, double>>()
             {
                 new Tuple<double, double>(
                     Math.PI / 8,
@@ -95,73 +99,25 @@ namespace Program
                     Math.PI / 2,
                     Math.Cos(Math.PI / 2) / Math.Sin(Math.PI / 2)
                 ),
-            }; */
-            /* Console.WriteLine(LagranzhInterpolationPolynomial(Math.PI / 3, in functionResults2));
-            Console.WriteLine(1 / Math.Tan(Math.PI / 3)); */
-
-            /* List<Tuple<double, double>> functionResults3 = new List<Tuple<double, double>>()
-            {
-                new Tuple<double, double>(1, 2.4142),
-                new Tuple<double, double>(1.9, 1.0818),
-                new Tuple<double, double>(2.8, 0.50953),
-                new Tuple<double, double>(3.7, 0.11836),
-                new Tuple<double, double>(4.6, -0.24008),
             };
 
-            List<Tuple<double, double>> testLab2 = new List<Tuple<double, double>>()
-            {
-                new Tuple<double, double>(0, 0),
-                new Tuple<double, double>(1, 1.8415),
-                new Tuple<double, double>(2, 2.9093),
-                new Tuple<double, double>(3, 3.1411),
-                new Tuple<double, double>(4, 3.2432),
-            }; */
-
-            //Console.WriteLine(SecondLab.SplinePolynomial(1.5, in test));
-
-            List<Tuple<double, double>> testLab3 = new List<Tuple<double, double>>()
-            {
-                new Tuple<double, double>(0, 0),
-                new Tuple<double, double>(1.7, 1.3038),
-                new Tuple<double, double>(3.4, 1.8439),
-                new Tuple<double, double>(5.1, 2.2583),
-                new Tuple<double, double>(6.8, 2.6077),
-                new Tuple<double, double>(8.5, 2.9155),
-            };
-
-            var res1 = ThirdLab.MinimalSqaresMethod(1, in testLab3);
-
-            /* for (int i = 0; i < res1.Count; i++)
-            {
-                Console.WriteLine($"x = {res1[i].Item1}         F{i} = {res1[i].Item2}");
-            } */
-
-            var res2 = ThirdLab.MinimalSqaresMethod(2, in testLab3);
-            /* var test4 = new List<Tuple<double, double>>()
-            {
-                new Tuple<double, double>(0, 0.4713),
-                new Tuple<double, double>(1.7, 1.0114),
-                new Tuple<double, double>(3.4, 1.5515),
-                new Tuple<double, double>(5.1, 2.0916),
-                new Tuple<double, double>(6.8, 2.6317),
-                new Tuple<double, double>(8.5, 3.1718),
-            };
-            Console.WriteLine("_________________________________________________");
-
-            res2 = ThirdLab.MinimalSqaresMethod(2, in testLab3);
-            for (int i = 0; i < res2.Count; i++)
-            {
-                Console.WriteLine($"x = {res2[i].Item1}         F{i} = {res2[i].Item2}");
-            } */
-
-            var results = new List<List<Tuple<double, double>>>() { res1, res2, testLab3 };
-
-            var graph = drawGraphic(
-                in results,
-                [new Color(200, 15, 150), new Color(15, 250, 100), new Color(50, 110, 170)]
+            Console.WriteLine($"A - Лагранж: {FirstLab.LagranzhInterpolationPolynomial(x, in a)}");
+            Console.WriteLine(
+                $"A - Лагранж (погрешность): {FirstLab.ErrorState(x, FirstLab.LagranzhInterpolationPolynomial, in a, cot)}"
             );
-            graph.SavePng("plot.png", 800, 600);
-            Process.Start("xdg-open", "plot.png");
+            Console.WriteLine($"A - Ньютон: {FirstLab.NewtonInterpolationPolynomial(x, in a)}");
+            Console.WriteLine(
+                $"A - Ньютон (погрешность): {FirstLab.ErrorState(x, FirstLab.NewtonInterpolationPolynomial, in a, cot)}"
+            );
+
+            Console.WriteLine($"Б - Лагранж: {FirstLab.LagranzhInterpolationPolynomial(x, in b)}");
+            Console.WriteLine(
+                $"Б - Лагранж (погрешность): {FirstLab.ErrorState(x, FirstLab.LagranzhInterpolationPolynomial, in b, cot)}"
+            );
+            Console.WriteLine($"Б - Ньютон: {FirstLab.NewtonInterpolationPolynomial(x, in b)}");
+            Console.WriteLine(
+                $"Б - Ньютон (погрешность): {FirstLab.ErrorState(x, FirstLab.NewtonInterpolationPolynomial, in b, cot)}"
+            );
         }
     }
 }
