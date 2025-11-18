@@ -8,23 +8,18 @@ namespace Program
 {
     class Program
     {
+        public delegate double f(double x, in List<Tuple<double, double>> res);
+
         public static Plot drawGraphic(
-            in List<List<Tuple<double, double>>> functionResultsList,
+            double left,
+            double right,
+            double step,
+            List<f> func,
+            List<Tuple<double, double>> results,
             Color[] color,
             String name = ""
         )
         {
-            if (functionResultsList.Count <= 0)
-            {
-                throw new InvalidOperationException("В списке нет функций на построение графика.");
-            }
-            if (color.Length != functionResultsList.Count)
-            {
-                throw new Exception(
-                    "Количество цветов в массиве и количество списков результатов не равно"
-                );
-            }
-
             Plot plt = new();
             if (name != "")
             {
@@ -35,18 +30,21 @@ namespace Program
 
             plt.Add.HorizontalLine(0, color: ScottPlot.Color.FromHex("#000000"), width: 2);
 
-            for (int i = 0; i < functionResultsList.Count; i++)
+            int n = (int)((right - left) / step) + 1;
+            for (int j = 0; j < func.Count; j++)
             {
-                double[] x = new double[functionResultsList[i].Count];
-                double[] y = new double[functionResultsList[i].Count];
+                double[] x = new double[n];
+                double[] y = new double[n];
 
-                for (int j = 0; j < x.Length; j++)
+                int index = 0;
+                for (double i = left; i <= right; i += step)
                 {
-                    x[j] = functionResultsList[i][j].Item1;
-                    y[j] = functionResultsList[i][j].Item2;
+                    x[index] = i;
+                    y[index] = func[j](i, in results);
+                    index++;
                 }
 
-                plt.Add.ScatterLine(x, y, color[i % color.Length]);
+                plt.Add.ScatterLine(x, y, color[j]);
             }
 
             return plt;
@@ -100,6 +98,40 @@ namespace Program
                     Math.Cos(Math.PI / 2) / Math.Sin(Math.PI / 2)
                 ),
             };
+
+            var plot = drawGraphic(
+                Math.PI / 8,
+                Math.PI / 2,
+                0.1,
+                [FirstLab.LagranzhInterpolationPolynomial, FirstLab.NewtonInterpolationPolynomial],
+                a,
+                new Color[]
+                {
+                    ScottPlot.Color.FromHex("#FF0000"),
+                    ScottPlot.Color.FromHex("#0000FF"),
+                },
+                "А"
+            );
+
+            plot.SavePng("plot.png", 800, 600);
+            Process.Start("xdg-open", "plot.png");
+
+            var plot1 = drawGraphic(
+                Math.PI / 8,
+                Math.PI / 2,
+                0.1,
+                [FirstLab.LagranzhInterpolationPolynomial, FirstLab.NewtonInterpolationPolynomial],
+                b,
+                new Color[]
+                {
+                    ScottPlot.Color.FromHex("#FF0000"),
+                    ScottPlot.Color.FromHex("#0000FF"),
+                },
+                "Б"
+            );
+
+            plot1.SavePng("plot1.png", 800, 600);
+            Process.Start("xdg-open", "plot1.png");
 
             Console.WriteLine($"A - Лагранж: {FirstLab.LagranzhInterpolationPolynomial(x, in a)}");
             Console.WriteLine(

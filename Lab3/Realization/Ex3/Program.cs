@@ -104,8 +104,11 @@ namespace Program
                 new Tuple<double, double>(5.5, -0.66818),
             };
 
+            var firstDegree = ThirdLab.MinimalSqaresMethod(1, in lab);
+            var secondDegree = ThirdLab.MinimalSqaresMethod(2, in lab);
+
             var plot = drawGraphic(
-                [ThirdLab.MinimalSqaresMethod(1, in lab), ThirdLab.MinimalSqaresMethod(2, in lab)],
+                [firstDegree, secondDegree],
                 [new Color(200, 15, 150), new Color(15, 200, 150)],
                 "Лабораторная работа №4"
             );
@@ -114,10 +117,10 @@ namespace Program
             Process.Start("xdg-open", "plot.png");
 
             Console.WriteLine(
-                $"Для первой степени: {ThirdLab.sumOfSquareErrors(in lab, ThirdLab.MinimalSqaresMethod(1, in lab))}"
+                $"\n\nДля первой степени: {ThirdLab.sumOfSquareErrors(in lab, firstDegree)}"
             );
             Console.WriteLine(
-                $"Для второй степени: {ThirdLab.sumOfSquareErrors(in lab, ThirdLab.MinimalSqaresMethod(2, in lab))}"
+                $"Для второй степени: {ThirdLab.sumOfSquareErrors(in lab, secondDegree)}"
             );
         }
     }
