@@ -45,6 +45,11 @@ public class ThirdLab
 
         var coefficients = Matrix<double>.LUSolutionMethod(system, b);
 
+        for (int i = 0; i < coefficientsCount; i++)
+        {
+            System.Console.WriteLine($"Coefficient {i}: {coefficients[i][0]}");
+        }
+
         var approximatedValues = new List<Tuple<double, double>>();
         for (int i = 0; i < functionResults.Count; i++)
         {

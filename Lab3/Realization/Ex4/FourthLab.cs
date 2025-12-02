@@ -65,7 +65,7 @@ namespace Program
             {
                 throw new Exception("X не внутри границ функции");
             }
-            return 2.0f * FirstLab._devDif(in functionResults, indexes.Item1, indexes.Item1 + 2);
+            return 2.0f * FirstLab._devDif(in functionResults, indexes.Item1, indexes.Item2 + 1);
         }
     }
 }

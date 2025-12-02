@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.Reflection.Metadata.Ecma335;
 using ScottPlot;
@@ -7,7 +7,6 @@ namespace Program
 {
     class Program
     {
-
         public delegate double f(double x, in List<Tuple<double, double>> res);
 
         public static Plot drawGraphic(
@@ -17,7 +16,8 @@ namespace Program
             List<f> func,
             List<Tuple<double, double>> results,
             Color[] color,
-            String name = ""
+            String name = "",
+            double specialX = double.NaN
         )
         {
             Plot plt = new();
@@ -29,6 +29,17 @@ namespace Program
             plt.YLabel("Y");
 
             plt.Add.HorizontalLine(0, color: ScottPlot.Color.FromHex("#000000"), width: 2);
+
+            string[] rainbowColors =
+            {
+                "#FF0000",
+                "#FF7F00",
+                "#FFFF00",
+                "#00FF00",
+                "#0000FF",
+                "#4B0082",
+                "#9400D3",
+            };
 
             int n = (int)((right - left) / step) + 1;
             for (int j = 0; j < func.Count; j++)
@@ -44,7 +55,74 @@ namespace Program
                     index++;
                 }
 
-                plt.Add.ScatterLine(x, y, color[j]);
+                // Draw segments between tuple points with different colors
+                for (int seg = 0; seg < results.Count; seg++)
+                {
+                    double segStart = seg == 0 ? left : results[seg - 1].Item1;
+                    double segEnd = results[seg].Item1;
+
+                    List<double> segX = new List<double>();
+                    List<double> segY = new List<double>();
+
+                    for (int i = 0; i < x.Length; i++)
+                    {
+                        if (x[i] >= segStart && x[i] <= segEnd)
+                        {
+                            segX.Add(x[i]);
+                            segY.Add(y[i]);
+                        }
+                    }
+
+                    if (segX.Count > 0)
+                    {
+                        Color segColor = Color.FromHex(rainbowColors[seg % rainbowColors.Length]);
+                        plt.Add.ScatterLine(segX.ToArray(), segY.ToArray(), segColor);
+                    }
+
+                    // Add bold point at tuple coordinate
+                    var marker = plt.Add.Scatter(
+                        new double[] { results[seg].Item1 },
+                        new double[] { results[seg].Item2 }
+                    );
+                    marker.Color = Color.FromHex("#000000");
+                    marker.MarkerSize = 10;
+                }
+
+                // Draw remaining segment after last tuple point
+                if (results.Count > 0 && results[results.Count - 1].Item1 < right)
+                {
+                    List<double> segX = new List<double>();
+                    List<double> segY = new List<double>();
+
+                    for (int i = 0; i < x.Length; i++)
+                    {
+                        if (x[i] >= results[results.Count - 1].Item1)
+                        {
+                            segX.Add(x[i]);
+                            segY.Add(y[i]);
+                        }
+                    }
+
+                    if (segX.Count > 0)
+                    {
+                        Color segColor = Color.FromHex(
+                            rainbowColors[results.Count % rainbowColors.Length]
+                        );
+                        plt.Add.ScatterLine(segX.ToArray(), segY.ToArray(), segColor);
+                    }
+                }
+
+                // Add special point marker
+                if (!double.IsNaN(specialX))
+                {
+                    double specialY = func[j](specialX, in results);
+                    var specialMarker = plt.Add.Scatter(
+                        new double[] { specialX },
+                        new double[] { specialY }
+                    );
+                    specialMarker.Color = Color.FromHex("#FF0000");
+                    specialMarker.MarkerSize = 12;
+                }
             }
 
             return plt;
@@ -73,7 +151,8 @@ namespace Program
                 new List<f>() { SecondLab.SplinePolynomial },
                 functionResults,
                 new Color[] { ScottPlot.Color.FromHex("#0000FF") },
-                "Spline Polynomial"
+                "Spline Polynomial",
+                x
             );
 
             plot.SavePng("spline.png", 800, 600);

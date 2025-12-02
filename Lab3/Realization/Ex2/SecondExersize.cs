@@ -140,7 +140,7 @@ public class SecondLab
         var coefficients = new ABCDCoefficients(in functionResults);
 
         #region debug
-        Console.WriteLine("=".PadRight(80, '='));
+        /* Console.WriteLine("=".PadRight(80, '='));
         Console.WriteLine("КОЭФФИЦИЕНТЫ КУБИЧЕСКИХ СПЛАЙНОВ");
         Console.WriteLine("=".PadRight(80, '='));
         Console.WriteLine($"Количество интервалов: {coefficients.a.Length - 1}");
@@ -160,7 +160,7 @@ public class SecondLab
             );
         }
         Console.WriteLine("=".PadRight(80, '='));
-        Console.WriteLine();
+        Console.WriteLine(); */
         #endregion
 
         Tuple<int, int> borders = coefficients.getBorders(x);

@@ -19,6 +19,7 @@ namespace Program
             double h1 = 1.0,
                 h2 = 0.5;
 
+
             double rect1 = FifthLab.RectangleIntegralMethod(h1, f, -2, 2);
             double rect2 = FifthLab.RectangleIntegralMethod(h2, f, -2, 2);
             double rectRR = FifthLab.RungeRombergIntegralMethod(h1, h2, rect1, rect2, 2);
