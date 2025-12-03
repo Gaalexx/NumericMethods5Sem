@@ -63,20 +63,20 @@ namespace BoundaryValueProblem
             out double ypNext
         )
         {
-            double k1y = yp;
-            double k1yp = F(x, y, yp);
+            double k1 = h * yp;
+            double l1 = h * F(x, y, yp);
 
-            double k2y = yp + h * k1yp / 2;
-            double k2yp = F(x + h / 2, y + h * k1y / 2, yp + h * k1yp / 2);
+            double k2 = h * (yp + l1 / 2);
+            double l2 = h * F(x + h / 2, y + k1 / 2, yp + l1 / 2);
 
-            double k3y = yp + h * k2yp / 2;
-            double k3yp = F(x + h / 2, y + h * k2y / 2, yp + h * k2yp / 2);
+            double k3 = h * (yp + l2 / 2);
+            double l3 = h * F(x + h / 2, y + k2 / 2, yp + l2 / 2);
 
-            double k4y = yp + h * k3yp;
-            double k4yp = F(x + h, y + h * k3y, yp + h * k3yp);
+            double k4 = h * (yp + l3);
+            double l4 = h * F(x + h, y + k3, yp + l3);
 
-            yNext = y + h * (k1y + 2 * k2y + 2 * k3y + k4y) / 6;
-            ypNext = yp + h * (k1yp + 2 * k2yp + 2 * k3yp + k4yp) / 6;
+            yNext = y + (k1 + 2 * k2 + 2 * k3 + k4) / 6;
+            ypNext = yp + (l1 + 2 * l2 + 2 * l3 + l4) / 6;
         }
 
         static (double[] x, double[] y) ShootingMethod(
@@ -224,7 +224,7 @@ namespace BoundaryValueProblem
             double x0 = 1.0;
             double xn = 2.0;
             double y0 = 1 + 4 * Math.Log(2);
-            double ypn = -1 + 3 * Math.Log(2);
+            double ypn = ExactDerivative(xn);
 
             int n1 = 10;
             int n2 = 20;
@@ -264,9 +264,7 @@ namespace BoundaryValueProblem
             var (xFd2, yFd2) = FiniteDifferenceMethod(x0, xn, y0, ypn, n2);
 
             Console.WriteLine($"Решение на сетке n={n1}:");
-            Console.WriteLine("┌──────────┬──────────────┬──────────────┬──────────────┐");
             Console.WriteLine("│    x     │   y_числ     │   y_точн     │   Погрешность│");
-            Console.WriteLine("├──────────┼──────────────┼──────────────┼──────────────┤");
 
             double maxErrorFd1 = 0;
             for (int i = 0; i <= n1; i += 2)
@@ -279,7 +277,6 @@ namespace BoundaryValueProblem
                     $"│ {xFd1[i], 8:F4} │ {yFd1[i], 12:E6} │ {exact, 12:E6} │ {error, 12:E4} │"
                 );
             }
-            Console.WriteLine("└──────────┴──────────────┴──────────────┴──────────────┘");
 
             double rreFd = RungeRombergError(yFd2[n2], yFd1[n1], 2);
             Console.WriteLine($"\nМаксимальная погрешность (точное решение): {maxErrorFd1:E4}");
@@ -288,19 +285,12 @@ namespace BoundaryValueProblem
             Console.WriteLine("\n\n3. СРАВНЕНИЕ МЕТОДОВ");
             Console.WriteLine("====================\n");
 
-            Console.WriteLine("┌────────────────────┬────────────────────┬────────────────────┐");
             Console.WriteLine("│     Параметр       │   Метод стрельбы   │ Конечно-разностный │");
-            Console.WriteLine("├────────────────────┼────────────────────┼────────────────────┤");
             Console.WriteLine(
                 $"│ Макс. погрешность │ {maxErrorShoot1, 18:E4} │ {maxErrorFd1, 18:E4} │"
             );
-            Console.WriteLine($"│ Оценка Рунге-     │ {rreShoot, 18:E4} │ {rreFd, 18:E4} │");
-            Console.WriteLine("│ Ромберга          │                    │                    │");
-            Console.WriteLine("└────────────────────┴────────────────────┴────────────────────┘");
+            Console.WriteLine($"│ Оценка Р-Р        │ {rreShoot, 18:E4} │ {rreFd, 18:E4} │");
 
-            // Анализ результатов
-            Console.WriteLine("\n4. ВЫВОДЫ");
-            Console.WriteLine("==========\n");
 
             if (maxErrorShoot1 < maxErrorFd1)
                 Console.WriteLine("• Метод стрельбы показал более высокую точность.");
