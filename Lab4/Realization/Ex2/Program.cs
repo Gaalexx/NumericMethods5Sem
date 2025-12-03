@@ -1,10 +1,41 @@
 using System;
+using System.Diagnostics;
 using ScottPlot;
 
 namespace BoundaryValueProblem
 {
     class Program
     {
+        static void DrawAndSaveGraph(
+            string title,
+            string filename,
+            double[] x,
+            double[] yNumeric,
+            double[] yExact
+        )
+        {
+            Plot plt = new();
+            plt.Title(title);
+            plt.XLabel("x");
+            plt.YLabel("y");
+
+            var exactLine = plt.Add.ScatterLine(x, yExact);
+            exactLine.Color = ScottPlot.Color.FromHex("#FF0000");
+            exactLine.LegendText = "Точное решение";
+            exactLine.LineWidth = 2;
+
+            var numericLine = plt.Add.ScatterLine(x, yNumeric);
+            numericLine.Color = ScottPlot.Color.FromHex("#0000FF");
+            numericLine.LegendText = "Численное решение";
+            numericLine.LineWidth = 2;
+            numericLine.LinePattern = LinePattern.Dashed;
+
+            plt.ShowLegend();
+            //plt.Axes.SetLimitsY(-25, 25);
+            plt.Axes.SetLimitsY(0, 5);
+            plt.SavePng(filename, 800, 600);
+        }
+
         static double ExactSolution(double x)
         {
             return -1 + 2.0 / x + (2.0 * (x + 1) / x) * Math.Log(Math.Abs(x + 1));
@@ -79,7 +110,7 @@ namespace BoundaryValueProblem
             double phi2 = SolveWithEta(eta2) - ypn;
 
             double tolerance = 1e-12;
-            int maxIter = 100;
+            int maxIter = 10000;
             double eta = eta2;
             double phi = phi2;
 
@@ -204,9 +235,6 @@ namespace BoundaryValueProblem
             var (xShoot1, yShoot1) = ShootingMethod(x0, xn, y0, ypn, n1, out double eta1);
             var (xShoot2, yShoot2) = ShootingMethod(x0, xn, y0, ypn, n2, out double eta2);
 
-            Console.WriteLine($"Найденное начальное условие y'({x0}) = {eta1:F8} (для n={n1})");
-            Console.WriteLine($"Найденное начальное условие y'({x0}) = {eta2:F8} (для n={n2})");
-
             Console.WriteLine($"\nРешение на сетке n={n1}:");
             Console.WriteLine("┌──────────┬──────────────┬──────────────┬──────────────┐");
             Console.WriteLine("│    x     │   y_числ     │   y_точн     │   Погрешность│");
@@ -291,8 +319,31 @@ namespace BoundaryValueProblem
                 $"• Погрешность начального условия: {Math.Abs(eta2 - ExactDerivative(1.0)):E4}"
             );
 
-            Console.WriteLine("\nДля завершения нажмите любую клавишу...");
-            Console.ReadKey();
+            double[] xExact = new double[n1 + 1];
+            double[] yExact = new double[n1 + 1];
+            for (int i = 0; i <= n1; i++)
+            {
+                xExact[i] = xShoot1[i];
+                yExact[i] = ExactSolution(xExact[i]);
+            }
+
+            DrawAndSaveGraph("Метод стрельбы", "shooting_method.png", xShoot1, yShoot1, yExact);
+            DrawAndSaveGraph(
+                "Конечно-разностный метод",
+                "finite_difference_method.png",
+                xFd1,
+                yFd1,
+                yExact
+            );
+
+            Console.WriteLine(
+                "\nГрафики сохранены: shooting_method.png, finite_difference_method.png"
+            );
+
+            Process.Start(new ProcessStartInfo("shooting_method.png") { UseShellExecute = true });
+            Process.Start(
+                new ProcessStartInfo("finite_difference_method.png") { UseShellExecute = true }
+            );
         }
     }
 }
